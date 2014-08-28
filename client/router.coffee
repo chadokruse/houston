@@ -34,7 +34,7 @@ Router.map ->
   houston_route = (route_name, options) =>
     # Append _houston_ to template and route names to avoid clobbering parent route namespace
     options.template = Houston._houstonize(options.template)
-    options.layoutTemplate = '_houston_master_layout'
+    options.layoutTemplate = null
     options.path = "#{Houston._ROOT_ROUTE}#{options.houston_path}"
     options.waitOn = ->
       ready: -> !Meteor.loggingIn() and Houston._subscribe('admin_user').ready()
@@ -53,8 +53,13 @@ Router.map ->
     houston_path: "/login"
     template: 'login'
 
+  houston_route 'custom_template',
+    houston_path: "/:template"
+    template: 'custom_template_view'
+    data: -> this.params
+
   houston_route 'change_password',
-    houston_path: "/password"
+    houston_path: "/password",
     template: 'change_password'
 
   houston_route 'collection',
@@ -74,34 +79,38 @@ Router.map ->
       {collection, name: @params.collection}
     template: 'document_view'
 
-  houston_route 'custom_template',
-    houston_path: "/:template"
-    template: 'custom_template_view'
-    data: -> this.params
-
 # ########
 # filters
 # ########
-mustBeAdmin = (pause) ->
+mustBeAdmin = ->
   if @ready() and not Houston._user_is_admin Meteor.userId()
-    pause()
+    @stop()
     Houston._go 'login'
 
 # If the host app doesn't have a router, their html may show up
 hide_non_admin_stuff = ->
-  $('body').css('visibility', 'hidden').children().hide()
-  $('body>.houston').show()
-remove_host_css = ->
-  $('link[rel="stylesheet"]').remove()
+  $('body').hide()
+  func = ->
+    $('body').show()
+    $('body').children().hide()
+    $('body>.houston').show()
+    $('body').css('visibility','hidden')
+    $('body>.houston').css('visibility', 'visible')
+  setTimeout func, 0
 
-BASE_HOUSTON_ROUTES = ['home', 'collection', 'document', 'change_password', 'custom_template']
-ALL_HOUSTON_ROUTES = BASE_HOUSTON_ROUTES.concat(['login'])
+remove_host_css = ->
+  $links = $('link[rel="stylesheet"]')
+  for link in $links
+    $link = $(link)
+    $link.remove()
+
+
 Router.onBeforeAction mustBeAdmin,
-  only: (Houston._houstonize_route(name) for name in BASE_HOUSTON_ROUTES)
+  only: (Houston._houstonize_route(name) for name in ['home', 'collection', 'document', 'change_password'])
 Router.onBeforeAction hide_non_admin_stuff,
-  only: (Houston._houstonize_route(name) for name in ALL_HOUSTON_ROUTES)
+  only: (Houston._houstonize_route(name) for name in ['home', 'collection', 'document', 'login', 'custom_template'])
 Router.onBeforeAction remove_host_css,
-  only: (Houston._houstonize_route(name) for name in ALL_HOUSTON_ROUTES)
+  only: (Houston._houstonize_route(name) for name in ['home', 'collection', 'document', 'login'])
 
 onRouteNotFound = Router.onRouteNotFound
 Router.onRouteNotFound = (args...) ->

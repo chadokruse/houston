@@ -1,9 +1,7 @@
-Houston._admin_user_exists = -> Houston._admins.find().count() > 0
-
-Handlebars.registerHelper 'currentUserIsAdmin', ->
-  Houston._user_is_admin(Meteor.userId())
-
-Handlebars.registerHelper 'adminUserExists', Houston._admin_user_exists
+if Handlebars?
+  Handlebars.registerHelper('onHoustonPage', ->
+    throw "Can't find root route" unless Houston._ROOT_ROUTE?
+    window.location.pathname.indexOf(Houston._ROOT_ROUTE) == 0)
 
 Houston._collections ?= {}
 
@@ -60,10 +58,3 @@ Houston._convert_to_correct_type = (field, val, collection) ->
     new constructor(val)
   else
     constructor(val)
-
-Houston._get_type = (field, collection) ->
-  find_obj = {}
-  find_obj[field] =
-    $exists: true
-  sample_val = Houston._nested_field_lookup(collection.findOne(find_obj), field)
-  typeof sample_val

@@ -1,5 +1,8 @@
+admin_user_exists = () -> Houston._admins.find().count() > 0
+
 Template._houston_login.helpers(
   logged_in: -> Meteor.user()
+  admin_user_exists: -> admin_user_exists()
 )
 
 Template._houston_login.events(
@@ -15,7 +18,7 @@ Template._houston_login.events(
       else
         Houston._go 'home'
 
-    if Houston._admin_user_exists()
+    if admin_user_exists()
       Meteor.loginWithPassword email, password, afterLogin
     else
       Accounts.createUser {
@@ -26,13 +29,11 @@ Template._houston_login.events(
         # else - user got created
         Houston._call('make_admin', Meteor.userId(), afterLogin)
 
-  'click #houston-logout': (e) ->
+  'click .houston-logout': (e) ->
     e.preventDefault()
     Meteor.logout()
-    # going 'home' clears the side nav
-    Houston._go 'home'
 
-  'click #become-houston-admin': (e) ->
+  'click .become-houston-admin': (e) ->
     e.preventDefault()
     Houston._call('make_admin', Meteor.userId())
     Houston._go 'home'

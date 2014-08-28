@@ -1,3 +1,11 @@
+DO NOT USE - HACK
+========
+THIS IS A TEMPORARY HACK. USE THE MAIN HOUSTON PACKAGE UNLESS YOU ABSOLUTELY NEED THIS.
+
+Fixes
+- v1.0.7 added a new bootstrap theme. If you already have bootstrap in your app, it will cause conflicts in the Bootstrap js plugins.
+- v1.0.7 added a dummy collection scheme which caused conflicts with apps hosted outside the built-in Meteor hosting (e.g. Modulus, etc)
+
 Houston
 ===============
 Houston (formerly Z-Mongo-Admin) is a zero-config Meteor Admin, modeled after [Django Admin](https://docs.djangoproject.com/en/dev/ref/contrib/admin/), intended as a simple way for developers to give end-users (or themselves) an easy way to view and manipulate their app's data.
